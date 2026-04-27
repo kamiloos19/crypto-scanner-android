@@ -98,6 +98,22 @@ jobs:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
+      - name: Show Gradle logs on failure
+        if: failure()
+        run: |
+          echo "=== Disk usage ==="
+          df -h
+          echo "=== Last 200 lines of buildozer build log ==="
+          DIST_DIR=$(find ~/.buildozer -name "gradlew" 2>/dev/null | head -1 | xargs dirname)
+          if [ -n "$DIST_DIR" ]; then
+            echo "Gradle dist: $DIST_DIR"
+            ls "$DIST_DIR"
+          fi
+          find ~/.buildozer .buildozer -name "*.log" 2>/dev/null | while read f; do
+            echo "=== $f (last 100 lines) ==="
+            tail -100 "$f"
+          done
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
